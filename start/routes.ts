@@ -12,11 +12,11 @@ import { middleware } from '#start/kernel'
 
 const apiPrefix = '/api/v1'
 
-router.get('/', async () => {
-  return {
-    hello: 'world',
-  }
-})
+// Route pour le health check UI
+router.get('/', '#controllers/health_controller.index')
+
+// Route pour le health check JSON
+router.get('/health', '#controllers/health_controller.check')
 
 // Routes d'authentification
 router
