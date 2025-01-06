@@ -8,7 +8,7 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     services:
       postgres:
@@ -17,6 +17,7 @@ jobs:
           POSTGRES_USER: kitus
           POSTGRES_PASSWORD: kitus
           POSTGRES_DB: kitus_test
+          POSTGRES_HOST_AUTH_METHOD: trust
         ports:
           - 5432:5432
         options: >-
@@ -60,16 +61,27 @@ jobs:
         APP_KEY=$(node -e "console.log(require('crypto').randomBytes(32).toString('base64'))")
         echo "APP_KEY=$APP_KEY" >> $GITHUB_ENV
 
+    - name: Setup Database
+      run: |
+        until pg_isready -h localhost -p 5432 -U kitus; do
+          echo "Waiting for PostgreSQL to be ready..."
+          sleep 2
+        done
+        PGPASSWORD=kitus psql -h localhost -U kitus -d kitus_test -c '\l'
+
     - name: Copy env file
       run: |
         cp .env.example .env
-        echo "APP_KEY=${{ env.APP_KEY }}" >> .env
-        echo "DB_CONNECTION=pg" >> .env
-        echo "PG_HOST=localhost" >> .env
-        echo "PG_PORT=5432" >> .env
-        echo "PG_USER=kitus" >> .env
-        echo "PG_PASSWORD=kitus" >> .env
-        echo "PG_DB_NAME=kitus_test" >> .env
+        cat >> .env << EOF
+        APP_KEY=${{ env.APP_KEY }}
+        NODE_ENV=test
+        DB_CONNECTION=pg
+        PG_HOST=localhost
+        PG_PORT=5432
+        PG_USER=kitus
+        PG_PASSWORD=kitus
+        PG_DB_NAME=kitus_test
+        EOF
 
     - name: Run migrations
       run: node ace migration:run
@@ -99,7 +111,8 @@ jobs:
       run: pnpm lint
 
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
+
     needs: test
 
     steps:
