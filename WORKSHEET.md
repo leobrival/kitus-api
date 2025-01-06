@@ -52,6 +52,19 @@
 - [x] Collection Postman avec exemples
 - [x] Guide d'installation et de configuration
 
+### Monitoring et Health Check
+- [x] Implémentation du service de health check
+- [x] Dashboard de monitoring en temps réel
+- [x] Surveillance des endpoints critiques
+- [x] Métriques système (mémoire, uptime)
+- [x] Interface utilisateur moderne avec Tailwind CSS
+
+### CI/CD
+- [x] Configuration de GitHub Actions pour CI
+- [x] Tests automatisés sur les PRs
+- [x] Build et artifacts automatiques
+- [x] Documentation du processus CD (CD.md)
+
 ## Tâches en Cours 
 
 ### Intégration des Sources de Données
@@ -75,6 +88,13 @@
 
 ## Prochaines Étapes 
 
+### Déploiement Continu
+- [ ] Configuration des environnements (staging/production)
+- [ ] Mise en place des pipelines de déploiement
+- [ ] Configuration du monitoring en production
+- [ ] Mise en place des procédures de rollback
+- [ ] Intégration avec AWS/Digital Ocean
+
 ### Système de Notifications
 - [ ] Implémentation des canaux de notification
   - [ ] Email (avec templates)
@@ -85,16 +105,16 @@
 - [ ] Tests des différents canaux
 
 ### Optimisation et Monitoring
-- [ ] Mise en place de la journalisation
-- [ ] Configuration du monitoring
+- [ ] Configuration des alertes
 - [ ] Optimisation des performances
-- [ ] Mise en place des health checks
+- [ ] Mise en place des health checks avancés
+- [ ] Intégration avec des outils de monitoring externes
 
 ### Tests et Qualité
 - [ ] Tests unitaires pour les services
 - [ ] Tests d'intégration pour les sources de données
 - [ ] Tests de charge
-- [ ] Mise en place de l'intégration continue
+- [ ] Mise en place de l'intégration continue avancée
 
 ## Points d'Attention 
 
@@ -102,41 +122,49 @@
 - Optimiser les requêtes aux sources de données
 - Mettre en place un cache efficace
 - Gérer correctement les timeouts
+- Monitoring des performances en production
 
 ### Fiabilité
 - Assurer la redondance des sources de données
 - Implémenter des circuit breakers
 - Gérer les erreurs de manière robuste
+- Procédures de rollback automatisées
 
 ### Sécurité
 - Valider toutes les entrées utilisateur
 - Mettre en place une authentification forte
 - Protéger contre les attaques courantes
+- Scan régulier des vulnérabilités
 
 ## Notes Techniques 
 
 ### Structure du Projet
 ```
 kitus-api/
+├── .github/
+│   └── workflows/    # Configuration CI/CD
 ├── app/
-│   ├── constants/        # Constantes système
-│   ├── controllers/      # Contrôleurs REST
-│   ├── middleware/       # Middlewares
-│   ├── models/          # Modèles de données
-│   └── services/        # Services métier
-├── config/              # Configuration
+│   ├── constants/    # Constantes système
+│   ├── controllers/  # Contrôleurs REST
+│   ├── middleware/   # Middlewares
+│   ├── models/      # Modèles de données
+│   └── services/    # Services métier
+├── config/          # Configuration
 ├── database/
-│   └── migrations/      # Migrations
-├── docs/               # Documentation
+│   └── migrations/  # Migrations
+├── docs/           # Documentation
+├── resources/
+│   └── views/      # Vues (health check UI)
 ├── start/
-│   └── routes.ts       # Routes
-└── tests/              # Tests
+│   └── routes.ts   # Routes
+└── tests/          # Tests
 ```
 
 ### Documentation
 - README.md : Guide principal
 - DEVBOOK.md : Documentation technique
 - API_DOCUMENTATION.md : Documentation API
+- CD.md : Guide de déploiement continu
 - postman_collection.json : Collection Postman
 
 ### Commandes Utiles
@@ -155,3 +183,9 @@ node ace make:controller
 
 # Démarrer les services Docker
 docker-compose up -d
+
+# Vérifier le statut CI
+gh run list
+
+# Déployer en staging
+gh workflow run deploy-staging.yml
