@@ -14,8 +14,8 @@ jobs:
       postgres:
         image: postgres:14
         env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: kitus
+          POSTGRES_PASSWORD: kitus
           POSTGRES_DB: kitus_test
         ports:
           - 5432:5432
@@ -64,6 +64,12 @@ jobs:
       run: |
         cp .env.example .env
         echo "APP_KEY=${{ env.APP_KEY }}" >> .env
+        echo "DB_CONNECTION=pg" >> .env
+        echo "PG_HOST=localhost" >> .env
+        echo "PG_PORT=5432" >> .env
+        echo "PG_USER=kitus" >> .env
+        echo "PG_PASSWORD=kitus" >> .env
+        echo "PG_DB_NAME=kitus_test" >> .env
 
     - name: Run migrations
       run: node ace migration:run
@@ -73,8 +79,8 @@ jobs:
         DB_CONNECTION: pg
         PG_HOST: localhost
         PG_PORT: 5432
-        PG_USER: postgres
-        PG_PASSWORD: postgres
+        PG_USER: kitus
+        PG_PASSWORD: kitus
         PG_DB_NAME: kitus_test
 
     - name: Run tests
@@ -85,8 +91,8 @@ jobs:
         DB_CONNECTION: pg
         PG_HOST: localhost
         PG_PORT: 5432
-        PG_USER: postgres
-        PG_PASSWORD: postgres
+        PG_USER: kitus
+        PG_PASSWORD: kitus
         PG_DB_NAME: kitus_test
 
     - name: Run linter
@@ -135,6 +141,7 @@ jobs:
       run: pnpm build
       env:
         APP_KEY: ${{ env.APP_KEY }}
+        NODE_ENV: production
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v3
