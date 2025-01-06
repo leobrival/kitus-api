@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kitus API - Health Status</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    function refreshHealth() {
+      fetch('/health')
+        .then(response => response.json())
+        .then(data => {
+          updateHealthDisplay(data);
+        });
+    }
+
+    function updateHealthDisplay(health) {
+      document.getElementById('status').className = 
+        `px-4 py-2 rounded-full font-bold ${
+          health.status === 'healthy' ? 'bg-green-100 text-green-800' :
+          health.status === 'degraded' ? 'bg-yellow-100 text-yellow-800' :
+          'bg-red-100 text-red-800'
+        }`;
+      document.getElementById('status').textContent = health.status.toUpperCase();
+      
+      document.getElementById('uptime').textContent = formatUptime(health.uptime);
+      document.getElementById('memory').textContent = 
+        `${health.memory.used}MB / ${health.memory.total}MB (${health.memory.percentage}%)`;
+      
+      updateServicesList(health.services);
+      updateEndpointsList(health.endpoints);
+      
+      document.getElementById('lastUpdate').textContent = 
+        new Date(health.timestamp).toLocaleString();
+    }
+
+    function formatUptime(seconds) {
+      const days = Math.floor(seconds / 86400);
+      const hours = Math.floor((seconds % 86400) / 3600);
+      const minutes = Math.floor((seconds % 3600) / 60);
+      const remainingSeconds = seconds % 60;
+      
+      return `${days}d ${hours}h ${minutes}m ${remainingSeconds}s`;
+    }
+
+    function updateServicesList(services) {
+      const servicesList = document.getElementById('services');
+      servicesList.innerHTML = services.map(service => `
+        <li class="mb-4 p-4 bg-white rounded-lg shadow">
+          <div class="flex items-center justify-between">
+            <span class="font-semibold">${service.service}</span>
+            <span class="px-3 py-1 rounded-full ${
+              service.status.status === 'healthy' ? 'bg-green-100 text-green-800' :
+              service.status.status === 'degraded' ? 'bg-yellow-100 text-yellow-800' :
+              'bg-red-100 text-red-800'
+            }">${service.status.status}</span>
+          </div>
+          <p class="text-sm text-gray-600 mt-2">${service.status.message}</p>
+          <p class="text-xs text-gray-500 mt-1">Last checked: ${new Date(service.lastChecked).toLocaleString()}</p>
+        </li>
+      `).join('');
+    }
+
+    function updateEndpointsList(endpoints) {
+      const endpointsList = document.getElementById('endpoints');
+      endpointsList.innerHTML = endpoints.map(endpoint => `
+        <li class="mb-4 p-4 bg-white rounded-lg shadow">
+          <div class="flex items-center justify-between">
+            <span class="font-semibold">${endpoint.endpoint}</span>
+            <span class="px-3 py-1 rounded-full ${
+              endpoint.status.status === 'healthy' ? 'bg-green-100 text-green-800' :
+              endpoint.status.status === 'degraded' ? 'bg-yellow-100 text-yellow-800' :
+              'bg-red-100 text-red-800'
+            }">${endpoint.status.status}</span>
+          </div>
+          <p class="text-sm text-gray-600 mt-2">${endpoint.status.message}</p>
+          ${endpoint.responseTime ? 
+            `<p class="text-sm text-gray-600">Response time: ${endpoint.responseTime.toFixed(2)}ms</p>` : 
+            ''}
+          <p class="text-xs text-gray-500 mt-1">Last checked: ${new Date(endpoint.lastChecked).toLocaleString()}</p>
+        </li>
+      `).join('');
+    }
+
+    // Rafraîchir toutes les 30 secondes
+    setInterval(refreshHealth, 30000);
+  </script>
+</head>
+<body class="bg-gray-50">
+  <div class="container mx-auto px-4 py-8">
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 mb-2">Kitus API Health Status</h1>
+      <div class="flex items-center space-x-4">
+        <span id="status" class="px-4 py-2 rounded-full font-bold 
+          {{ health.status === 'healthy' ? 'bg-green-100 text-green-800' :
+             health.status === 'degraded' ? 'bg-yellow-100 text-yellow-800' :
+             'bg-red-100 text-red-800' }}">
+          {{ health.status.toUpperCase() }}
+        </span>
+        <span class="text-sm text-gray-600">Version: {{ health.version }}</span>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+      <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-xl font-semibold mb-4">System Info</h2>
+        <div class="space-y-2">
+          <p><span class="font-medium">Uptime:</span> <span id="uptime">{{ formatUptime(health.uptime) }}</span></p>
+          <p><span class="font-medium">Memory Usage:</span> <span id="memory">{{ health.memory.used }}MB / {{ health.memory.total }}MB ({{ health.memory.percentage }}%)</span></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div>
+        <h2 class="text-xl font-semibold mb-4">Services</h2>
+        <ul id="services" class="space-y-4">
+          @each(service in health.services)
+            <li class="mb-4 p-4 bg-white rounded-lg shadow">
+              <div class="flex items-center justify-between">
+                <span class="font-semibold">{{ service.service }}</span>
+                <span class="px-3 py-1 rounded-full 
+                  {{ service.status.status === 'healthy' ? 'bg-green-100 text-green-800' :
+                     service.status.status === 'degraded' ? 'bg-yellow-100 text-yellow-800' :
+                     'bg-red-100 text-red-800' }}">
+                  {{ service.status.status }}
+                </span>
+              </div>
+              <p class="text-sm text-gray-600 mt-2">{{ service.status.message }}</p>
+              <p class="text-xs text-gray-500 mt-1">Last checked: {{ new Date(service.lastChecked).toLocaleString() }}</p>
+            </li>
+          @end
+        </ul>
+      </div>
+
+      <div>
+        <h2 class="text-xl font-semibold mb-4">Endpoints</h2>
+        <ul id="endpoints" class="space-y-4">
+          @each(endpoint in health.endpoints)
+            <li class="mb-4 p-4 bg-white rounded-lg shadow">
+              <div class="flex items-center justify-between">
+                <span class="font-semibold">{{ endpoint.endpoint }}</span>
+                <span class="px-3 py-1 rounded-full 
+                  {{ endpoint.status.status === 'healthy' ? 'bg-green-100 text-green-800' :
+                     endpoint.status.status === 'degraded' ? 'bg-yellow-100 text-yellow-800' :
+                     'bg-red-100 text-red-800' }}">
+                  {{ endpoint.status.status }}
+                </span>
+              </div>
+              <p class="text-sm text-gray-600 mt-2">{{ endpoint.status.message }}</p>
+              @if(endpoint.responseTime)
+                <p class="text-sm text-gray-600">Response time: {{ endpoint.responseTime.toFixed(2) }}ms</p>
+              @end
+              <p class="text-xs text-gray-500 mt-1">Last checked: {{ new Date(endpoint.lastChecked).toLocaleString() }}</p>
+            </li>
+          @end
+        </ul>
+      </div>
+    </div>
+
+    <div class="mt-8 text-center text-sm text-gray-600">
+      Last update: <span id="lastUpdate">{{ new Date(health.timestamp).toLocaleString() }}</span>
+    </div>
+  </div>
+</body>
+</html>
