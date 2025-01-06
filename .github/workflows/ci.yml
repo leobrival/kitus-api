@@ -55,13 +55,21 @@ jobs:
     - name: Install dependencies
       run: pnpm install
 
+    - name: Generate APP_KEY
+      run: |
+        APP_KEY=$(node -e "console.log(require('crypto').randomBytes(32).toString('base64'))")
+        echo "APP_KEY=$APP_KEY" >> $GITHUB_ENV
+
     - name: Copy env file
-      run: cp .env.example .env
+      run: |
+        cp .env.example .env
+        echo "APP_KEY=${{ env.APP_KEY }}" >> .env
 
     - name: Run migrations
       run: node ace migration:run
       env:
         NODE_ENV: test
+        APP_KEY: ${{ env.APP_KEY }}
         DB_CONNECTION: pg
         PG_HOST: localhost
         PG_PORT: 5432
@@ -73,6 +81,7 @@ jobs:
       run: pnpm test
       env:
         NODE_ENV: test
+        APP_KEY: ${{ env.APP_KEY }}
         DB_CONNECTION: pg
         PG_HOST: localhost
         PG_PORT: 5432
@@ -117,8 +126,15 @@ jobs:
     - name: Install dependencies
       run: pnpm install
 
+    - name: Generate APP_KEY
+      run: |
+        APP_KEY=$(node -e "console.log(require('crypto').randomBytes(32).toString('base64'))")
+        echo "APP_KEY=$APP_KEY" >> $GITHUB_ENV
+
     - name: Build
       run: pnpm build
+      env:
+        APP_KEY: ${{ env.APP_KEY }}
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v3
