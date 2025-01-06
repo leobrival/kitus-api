@@ -1,0 +1,257 @@
+{
+  "info": {
+    "name": "Kitus API",
+    "description": "API de gestion des alertes et données météorologiques pour les territoires d'outre-mer",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "description": "Endpoints d'authentification",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "register"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\",\n  \"name\": \"John Doe\"\n}"
+            },
+            "description": "Inscription d'un nouvel utilisateur"
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "login"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "description": "Connexion utilisateur et obtention du token"
+          }
+        },
+        {
+          "name": "Me",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "me"]
+            },
+            "description": "Obtenir les informations de l'utilisateur connecté"
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/refresh",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "refresh"]
+            },
+            "description": "Rafraîchir le token d'accès"
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "logout"]
+            },
+            "description": "Déconnexion et révocation du token"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Alerts",
+      "description": "Endpoints de gestion des alertes",
+      "item": [
+        {
+          "name": "Get All Alerts",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/alerts",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "alerts"]
+            },
+            "description": "Récupérer toutes les alertes actives"
+          }
+        },
+        {
+          "name": "Get Alert by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/alerts/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "alerts", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1",
+                  "description": "ID de l'alerte"
+                }
+              ]
+            },
+            "description": "Récupérer une alerte spécifique par son ID"
+          }
+        },
+        {
+          "name": "Get Alerts by Region",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/alerts/region/:region",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "alerts", "region", ":region"],
+              "variable": [
+                {
+                  "key": "region",
+                  "value": "REUNION",
+                  "description": "Code de la région"
+                }
+              ]
+            },
+            "description": "Récupérer les alertes pour une région spécifique"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Weather",
+      "description": "Endpoints météorologiques",
+      "item": [
+        {
+          "name": "Get Weather by Region",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/weather/:region",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "weather", ":region"],
+              "variable": [
+                {
+                  "key": "region",
+                  "value": "REUNION",
+                  "description": "Code de la région"
+                }
+              ]
+            },
+            "description": "Obtenir les conditions météorologiques actuelles pour une région"
+          }
+        },
+        {
+          "name": "Get Weather Forecast",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/weather/:region/forecast",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "weather", ":region", "forecast"],
+              "variable": [
+                {
+                  "key": "region",
+                  "value": "REUNION",
+                  "description": "Code de la région"
+                }
+              ]
+            },
+            "description": "Obtenir les prévisions météorologiques pour une région"
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3333",
+      "type": "string",
+      "description": "URL de base de l'API"
+    },
+    {
+      "key": "token",
+      "value": "votre_token_jwt",
+      "type": "string",
+      "description": "Token JWT d'authentification"
+    }
+  ]
+}
