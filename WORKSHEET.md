@@ -74,6 +74,27 @@
 
 ## Tâches en Cours 
 
+### CI/CD
+- [ ] Correction des problèmes CI
+  - [x] Configuration de GitHub Actions
+  - [x] Configuration de pnpm
+  - [ ] Résolution des problèmes d'authentification PostgreSQL
+  - [ ] Validation des migrations de base de données
+  - [ ] Tests d'intégration
+
+### Problèmes Identifiés 
+- Échec de l'authentification PostgreSQL dans le workflow CI
+- Problèmes avec les variables d'environnement (APP_KEY)
+- Migration de la base de données échoue dans CI
+- Besoin de stabiliser l'environnement de test
+
+### Actions Correctives 
+- [ ] Vérifier la configuration PostgreSQL dans CI
+- [ ] Tester les migrations localement avec les mêmes paramètres
+- [ ] Ajouter plus de logs pour le debugging
+- [ ] Mettre en place des tests de connexion à la base de données
+- [ ] Documenter les erreurs connues et leurs solutions
+
 ### Intégration des Sources de Données
 - [ ] Implémentation des services pour chaque source de données
   - [ ] Service Météo France
@@ -136,17 +157,17 @@
 - Optimisation des builds Docker
 
 ### Fiabilité
-- Assurer la redondance des services
-- Implémenter des health checks pour tous les services
-- Gérer les erreurs de manière robuste
-- Procédures de rollback automatisées
-- Gestion des volumes Docker
+- Problèmes d'intégration continue à résoudre
+- Besoin de tests plus robustes
+- Configuration de l'environnement CI à stabiliser
+- Gestion des secrets et variables d'environnement à améliorer
+- Procédures de rollback à tester
 
 ### Sécurité
-- Valider toutes les entrées utilisateur
-- Mettre en place une authentification forte
-- Protéger contre les attaques courantes
-- Scan régulier des vulnérabilités
+- Vérifier les permissions de la base de données
+- Sécuriser les variables d'environnement dans CI
+- Audit des dépendances à effectuer (vulnérabilité détectée)
+- Revoir la gestion des secrets
 
 ## Notes Techniques 
 
@@ -173,13 +194,6 @@ kitus-api/
 └── tests/          # Tests
 ```
 
-### Documentation
-- README.md : Guide principal
-- DEVBOOK.md : Documentation technique
-- API_DOCUMENTATION.md : Documentation API
-- CD.md : Guide de déploiement continu
-- postman_collection.json : Collection Postman
-
 ### Commandes Utiles
 ```bash
 # Démarrer les services Docker
@@ -199,3 +213,232 @@ gh run list
 
 # Déployer en staging
 gh workflow run deploy-staging.yml
+```
+
+### Commandes de Debug CI
+```bash
+# Vérifier le statut des workflows
+gh run list
+
+# Voir les logs détaillés d'un run
+gh run view [RUN_ID] --log
+
+# Tester la connexion PostgreSQL localement
+PGPASSWORD=kitus psql -h localhost -U kitus -d kitus_test -c '\l'
+
+# Lancer les migrations en mode debug
+NODE_ENV=test DEBUG=* node ace migration:run
+
+# Vérifier la configuration
+node ace config:validate
+```
+
+### Erreurs Connues
+1. Authentification PostgreSQL
+   ```
+   error: password authentication failed for user "kitus"
+   ```
+   - Vérifier les variables d'environnement
+   - Confirmer les permissions utilisateur
+   - Tester avec `POSTGRES_HOST_AUTH_METHOD=trust`
+
+2. Variables d'Environnement
+   ```
+   EnvValidationException: Missing environment variable "APP_KEY"
+   ```
+   - Générer APP_KEY avant les tests
+   - Vérifier la copie du fichier .env
+   - Valider les variables requises
+
+## Aperçu des Services Météo 
+
+### Météo-France
+- **API Publiques**
+  - Observations en temps réel
+  - Prévisions météorologiques
+  - Données radar
+- **Paramètres Disponibles**
+  - Température de l'air (2m)
+  - Humidité relative horaire
+  - Direction et vitesse du vent (10m)
+  - Précipitations (6 min)
+- **Spécifications Techniques**
+  - Services web INSPIRE
+  - Formats: GRIB V2, GEOTIFF, PNG
+  - Mise à jour en temps réel
+  - Rétention: 24 heures
+
+### NOAA
+- **Climate Data Online (CDO)**
+  - Token d'accès requis
+  - Limite: 5 requêtes/sec, 10k/jour
+- **NCEI Data Service**
+  - API RESTful
+  - Formats: CSV, JSON, PDF, NetCDF
+- **CO-OPS API**
+  - Observations et prévisions
+  - Données des stations
+  - Niveaux d'eau et température
+
+### USGS
+- **Services Disponibles**
+  - Données géologiques
+  - Données hydrologiques
+  - Données sismiques
+- **Spécifications**
+  - API RESTful
+  - Formats: JSON, XML
+  - Documentation détaillée
+
+## Tâches en Cours 
+
+### Intégration des Services
+- [ ] Configuration des clients API
+  - [ ] Météo-France: Service web INSPIRE
+  - [ ] NOAA: Gestion des tokens
+  - [ ] USGS: Client RESTful
+- [ ] Gestion des formats de données
+  - [ ] Parseurs pour GRIB V2, GEOTIFF
+  - [ ] Convertisseurs CSV, JSON, NetCDF
+  - [ ] Normalisation des données
+- [ ] Système de cache
+  - [ ] Redis pour les données temps réel
+  - [ ] Stratégies de mise en cache
+  - [ ] Invalidation intelligente
+
+### CI/CD
+- [ ] Correction des problèmes CI
+  - [x] Configuration de GitHub Actions
+  - [x] Configuration de pnpm
+  - [ ] Résolution des problèmes d'authentification PostgreSQL
+  - [ ] Validation des migrations
+  - [ ] Tests d'intégration
+
+### Problèmes Identifiés 
+- Échec de l'authentification PostgreSQL dans CI
+- Gestion des variables d'environnement
+- Migration de la base de données
+- Stabilité de l'environnement de test
+
+## Points d'Attention 
+
+### Performance
+- Optimisation des requêtes API externes
+- Cache Redis pour les données fréquentes
+- Gestion des limites de taux (rate limits)
+- Monitoring des temps de réponse
+- Optimisation des conversions de données
+
+### Sécurité
+- Gestion sécurisée des tokens API
+- Protection des données sensibles
+- Audit des dépendances
+- Validation des entrées
+- Logs sécurisés
+
+### Fiabilité
+- Gestion des pannes API externes
+- Stratégies de fallback
+- Monitoring des services
+- Tests de charge
+- Procédures de récupération
+
+## Architecture Technique 
+
+### Services Externes
+```
+Kitus API
+├── Services Météo
+│   ├── Météo-France
+│   │   ├── Observations
+│   │   ├── Prévisions
+│   │   └── Radar
+│   ├── NOAA
+│   │   ├── CDO
+│   │   ├── NCEI
+│   │   └── CO-OPS
+│   └── USGS
+│       ├── Géologie
+│       ├── Hydrologie
+│       └── Sismique
+```
+
+### Gestion des Données
+```
+Pipeline de Données
+├── Collecte
+│   ├── Rate Limiting
+│   └── Validation
+├── Transformation
+│   ├── Parseurs
+│   ├── Convertisseurs
+│   └── Normalisation
+├── Stockage
+│   ├── Cache (Redis)
+│   └── Base de données
+└── Distribution
+    ├── API REST
+    └── Webhooks
+```
+
+### Variables d'Environnement Requises
+```bash
+# API Keys
+METEO_FRANCE_API_KEY=
+NOAA_API_TOKEN=
+USGS_API_KEY=
+
+# Services Configuration
+RATE_LIMIT_REQUESTS=5
+RATE_LIMIT_INTERVAL=1000
+CACHE_TTL=3600
+
+# Database
+DB_CONNECTION=pg
+PG_HOST=localhost
+PG_PORT=5432
+PG_USER=kitus
+PG_PASSWORD=kitus
+PG_DB_NAME=kitus
+
+# Redis
+REDIS_HOST=localhost
+REDIS_PORT=6379
+```
+
+## Commandes Utiles 
+
+### Développement
+```bash
+# Tester les services météo
+pnpm test:weather
+
+# Vérifier les limites de taux
+pnpm check:limits
+
+# Valider les données
+pnpm validate:data
+```
+
+### Monitoring
+```bash
+# Statut des services
+pnpm service:status
+
+# Logs des API externes
+pnpm logs:external
+
+# Métriques de performance
+pnpm metrics:show
+```
+
+### Debug
+```bash
+# Test de connexion API
+pnpm test:api-connection
+
+# Vérification du cache
+pnpm cache:status
+
+# Validation des données
+pnpm data:validate
