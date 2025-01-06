@@ -61,9 +61,16 @@
 
 ### CI/CD
 - [x] Configuration de GitHub Actions pour CI
-- [x] Tests automatisés sur les PRs
-- [x] Build et artifacts automatiques
+  - [x] Configuration correcte de pnpm
+  - [x] Tests avec PostgreSQL
+  - [x] Build et artifacts
 - [x] Documentation du processus CD (CD.md)
+- [x] Configuration Docker complète
+  - [x] Service API avec health check
+  - [x] PostgreSQL avec persistance
+  - [x] Redis pour le cache
+  - [x] pgAdmin pour l'administration
+- [x] Dockerfile optimisé avec pnpm
 
 ## Tâches en Cours 
 
@@ -77,7 +84,9 @@
 
 ### Système de Cache
 - [ ] Configuration de Redis
-- [ ] Implémentation des stratégies de cache
+  - [x] Service Docker configuré
+  - [ ] Intégration avec l'API
+  - [ ] Stratégies de cache
 - [ ] Gestion des invalidations de cache
 
 ### Swagger/OpenAPI
@@ -114,21 +123,24 @@
 - [ ] Tests unitaires pour les services
 - [ ] Tests d'intégration pour les sources de données
 - [ ] Tests de charge
-- [ ] Mise en place de l'intégration continue avancée
+- [x] CI avec GitHub Actions et pnpm
+- [ ] Tests d'intégration Docker
 
 ## Points d'Attention 
 
 ### Performance
 - Optimiser les requêtes aux sources de données
-- Mettre en place un cache efficace
+- Mettre en place un cache efficace avec Redis
 - Gérer correctement les timeouts
 - Monitoring des performances en production
+- Optimisation des builds Docker
 
 ### Fiabilité
-- Assurer la redondance des sources de données
-- Implémenter des circuit breakers
+- Assurer la redondance des services
+- Implémenter des health checks pour tous les services
 - Gérer les erreurs de manière robuste
 - Procédures de rollback automatisées
+- Gestion des volumes Docker
 
 ### Sécurité
 - Valider toutes les entrées utilisateur
@@ -152,6 +164,7 @@ kitus-api/
 ├── config/          # Configuration
 ├── database/
 │   └── migrations/  # Migrations
+├── docker/         # Configurations Docker supplémentaires
 ├── docs/           # Documentation
 ├── resources/
 │   └── views/      # Vues (health check UI)
@@ -169,20 +182,17 @@ kitus-api/
 
 ### Commandes Utiles
 ```bash
-# Démarrer le serveur de développement
-pnpm run dev
-
-# Exécuter les tests
-pnpm test
-
-# Créer une migration
-node ace make:migration
-
-# Créer un contrôleur
-node ace make:controller
-
 # Démarrer les services Docker
 docker-compose up -d
+
+# Rebuilder un service spécifique
+docker-compose up -d --build api
+
+# Voir les logs
+docker-compose logs -f api
+
+# Exécuter les tests dans Docker
+docker-compose exec api pnpm test
 
 # Vérifier le statut CI
 gh run list
